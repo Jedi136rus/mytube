@@ -3,7 +3,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.core.paginator import Paginator
 from django.views.decorators.cache import cache_page
+from django.http import JsonResponse
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+from .serializers import PostSerializer
 from .forms import PostForm, CommentFrom
 from .models import Post, Comment, Follow
 
@@ -193,3 +199,30 @@ def profile_unfollow(request, username):
     return redirect("/"+username+"/")
 
 
+@api_view(['GET', 'PUT', 'PATH', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def api_posts_detail(request, id):
+    if request.method == 'GET':
+        post = get_object_or_404(Post, pk=id)
+        serializer = PostSerializer(post)
+        return JsonResponse(serializer.data, safe=False, json_dumps_params={'ensure_ascii': False},)
+    if request.method == 'POST':
+        return Response({'message': f'Привет {request.data}'})
+
+
+@api_view(['GET', 'POST'])
+def api_posts(request):
+    if request.method == 'GET':
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        data = {
+            "author": request.user.pk,
+            "text": request.data['text'],
+        }
+        serializer = PostSerializer(data=data, many=False)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

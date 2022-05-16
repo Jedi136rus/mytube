@@ -15,6 +15,13 @@ urlpatterns = [
         path('about-spec/', views.flatpage, {'url': '/about-spec/'}, name='spec'),
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    import debug_toolbar
+
+    urlpatterns += (path("__debug__/", include(debug_toolbar.urls)),)
+
 urlpatterns += [
     path('admin/', admin.site.urls),
     path('', include("posts.urls")),
@@ -24,10 +31,6 @@ urlpatterns += [
 ]
 
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    import debug_toolbar
 
-    urlpatterns += (path("__debug__/", include(debug_toolbar.urls)),)
+
 

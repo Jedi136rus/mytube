@@ -1,6 +1,6 @@
 from django.urls import path
-
 from . import views
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     # Подписки
@@ -22,6 +22,16 @@ urlpatterns = [
         views.post_edit,
         name='post_edit'
     ),
-    path("<username>/<int:post_id>/comment", views.add_comment, name="add_comment"),
+    path("<username>/<int:post_id>/comment/", views.add_comment, name="add_comment"),
 
+
+    path("api/v1/posts/", views.api_posts),
+    path("api/v1/posts/<int:id>/", views.api_posts_detail),
+
+
+]
+
+
+urlpatterns += [
+    path('api/token/auth/', obtain_auth_token)
 ]
